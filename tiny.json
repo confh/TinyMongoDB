@@ -28,16 +28,16 @@
   ],
   "plugins": [
     {
-      "name": "tiny_mongodb.dll",
-      "path": "plugins/tiny_mongodb.dll"
+      "name": "tiny_mongo.dll",
+      "path": "plugins/tiny_mongo.dll"
     },
     {
-      "name": "tiny_mongodb.so",
-      "path": "plugins/tiny_mongodb.so"
+      "name": "tiny_mongo.so",
+      "path": "plugins/tiny_mongo.so"
     },
     {
-      "name": "tiny_mongodb.dylib",
-      "path": "plugins/tiny_mongodb.dylib"
+      "name": "tiny_mongo.dylib",
+      "path": "plugins/tiny_mongo.dylib"
     }
   ],
   "compilerOptions": {
