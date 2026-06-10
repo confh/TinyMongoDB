@@ -21,10 +21,7 @@
   "ignore": [
     "*.go",
     "*.mod",
-    "*.sum",
-    "*.dylib",
-    "*.dll",
-    "*.so"
+    "*.sum"
   ],
   "plugins": [
     {
