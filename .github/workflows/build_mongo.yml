@@ -12,21 +12,25 @@ on:
 jobs:
   build-macos-arm64:
     runs-on: macos-latest
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "v1.26.2"
+          go-version: "stable"
 
-      - run: go mod tidy
+      - name: Run go mod tidy
+        working-directory: plugins
+        run: go mod tidy
 
       - name: Build macOS arm64 .dylib
+        working-directory: plugins
         run: |
           CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 \
-          go build -buildmode=c-shared -ldflags="-s -w" -o tiny_mongo_arm64.dylib mongodb.go
+          go build -buildmode=c-shared -ldflags="-s -w" -o tiny_mongo.dylib main.go
 
       - uses: actions/upload-artifact@v4
         with:
           name: tiny_mongo_macos_arm64
-          path: tiny_mongo_arm64.dylib
+          path: plugins/tiny_mongo.dylib
