@@ -1,0 +1,25 @@
+import std "error";
+import "collection.tiny" as Collection;
+
+// Represents one MongoDB database.
+export class Database {
+    field client = 0
+    field name = ""
+    field plugin: any = null
+
+    // Creates a database wrapper.
+    fn init(client: number, name: string, plugin) {
+        this.client = client
+        this.name = name
+        this.plugin = plugin
+    }
+
+    // Returns a collection wrapper.
+    fn collection(name: string): Collection.Collection {
+        if name == "" {
+            throw error.new("ValidationError", "collection name is required")
+        }
+
+        return Collection.Collection(this.client, this.name, name, this.plugin)
+    }
+}

@@ -1,0 +1,51 @@
+// Result returned by connect().
+export interface ConnectResult {
+    client: number
+}
+
+// Result returned by ping(), disconnect(), or closeAll().
+export interface SuccessResult {
+    success: bool
+}
+
+// Result returned by insertOne().
+export interface InsertOneResult {
+    insertedId: any
+}
+
+// Result returned by insertMany().
+export interface InsertManyResult {
+    insertedIds: array
+}
+
+// Result returned by findOne().
+export interface FindOneResult {
+    doc: any
+}
+
+// Result returned by findMany().
+export interface FindManyResult {
+    docs: array
+}
+
+// Result returned by updateOne() and updateMany().
+export interface UpdateResult {
+    matched: number
+    modified: number
+    upsertedId: any
+}
+
+// Result returned by deleteOne() and deleteMany().
+export interface DeleteResult {
+    deleted: number
+}
+
+// Result returned by countDocuments().
+export interface CountResult {
+    count: number
+}
+
+// Result returned by createIndex().
+export interface CreateIndexResult {
+    name: string
+}

@@ -1,0 +1,69 @@
+import std "error";
+import "results.tiny" as results
+import "database.tiny" as Database;
+
+// Represents one MongoDB client connection.
+// Create this with mongo.connect(uri).
+export class MongoClient {
+    field id = 0
+    field closed = false
+    field plugin: any = null
+
+    // Creates a client wrapper around a native client handle.
+    fn init(id: number, plugin) {
+        this.id = id
+        this.closed = false
+        this.plugin = plugin
+    }
+
+    // Returns the internal native client handle.
+    fn handle(): number {
+        return this.id
+    }
+
+    // Throws if this client has already been disconnected.
+    fn assertOpen() {
+        if this.closed {
+            throw error.new("MongoError", "client is already disconnected")
+        }
+    }
+
+    // Pings MongoDB to check that the connection is alive.
+    fn ping(timeoutMs = 10000): results.SuccessResult {
+        this.assertOpen()
+
+        return this.plugin.ping({
+            client: this.id,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Returns a database wrapper.
+    fn database(name: string): Database.Database {
+        this.assertOpen()
+
+        if name == "" {
+            throw error.new("ValidationError", "database name is required")
+        }
+
+        return Database.Database(this.id, name, this.plugin)
+    }
+
+    // Disconnects the client.
+    // Calling disconnect more than once is safe.
+    fn disconnect(timeoutMs = 10000): results.SuccessResult {
+        if this.closed {
+            return {
+                success: true
+            }
+        }
+
+        const result: results.SuccessResult = this.plugin.disconnect({
+            client: this.id,
+            timeoutMs: timeoutMs
+        })
+
+        this.closed = true
+        return result
+    }
+}

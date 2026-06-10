@@ -1,0 +1,7 @@
+dist/
+*.tbc
+.tinycache/
+*.env
+*.dll
+*.dylib
+*.so

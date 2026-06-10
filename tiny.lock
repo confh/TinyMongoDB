@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "dependencies": {
+    "TinyDotEnv": {
+      "source": "github:confh/TinyDotEnv",
+      "version": "main",
+      "resolved": "github:confh/TinyDotEnv@main",
+      "owner": "confh",
+      "repo": "TinyDotEnv"
+    }
+  }
+}

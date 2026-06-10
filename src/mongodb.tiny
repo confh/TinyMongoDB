@@ -1,0 +1,272 @@
+import std "error"
+import plugin "../plugins/tiny_mongo" as mongoPlugin
+import lib "confh/TinyDotEnv" as TinyDotEnv;
+import std "process";
+import "client.tiny" as Client;
+import "results.tiny" as Results;
+
+// Information about the native MongoDB plugin.
+export interface MongoVersion {
+    name: string
+    version: string
+    driver: string
+    extendedJson: bool
+}
+
+// Tiny-friendly MongoDB ObjectID returned by the plugin.
+//
+// MongoDB Extended JSON output:
+//
+// ```json
+// { "$oid": "665f1234567890abcdef1234" }
+// ```
+//
+// Becomes:
+//
+// ```tiny
+// { id: "665f1234567890abcdef1234" }
+// ```
+export interface MongoObjectID {
+    id: string
+}
+
+// Tiny-friendly MongoDB Date returned by the plugin.
+//
+// MongoDB Extended JSON output:
+//
+// ```json
+// { "$date": "2026-06-10T12:00:00Z" }
+// ```
+//
+// Becomes:
+//
+// ```tiny
+// { date: "2026-06-10T12:00:00Z" }
+// ```
+export interface MongoDate {
+    date: string
+}
+
+// Tiny-friendly MongoDB Decimal128 returned by the plugin.
+export interface MongoDecimal {
+    decimal: string
+}
+
+// Tiny-friendly MongoDB Binary returned by the plugin.
+export interface MongoBinary {
+    binary: object
+}
+
+// Tiny-friendly MongoDB Regex returned by the plugin.
+export interface MongoRegex {
+    regex: object
+}
+
+// Creates a MongoDB ObjectID input value.
+// This is only used when sending data to MongoDB.
+//
+// Returned documents use the Tiny-friendly shape:
+//
+// ```tiny
+// doc._id.id
+// ```
+//
+// Example:
+// ```tiny
+// users.findOne({ "_id": mongo.id("665f1234567890abcdef1234") })
+// ```
+export fn id(value: string) {
+    return {
+        "$oid": value
+    }
+}
+
+// Alias for id().
+export fn objectId(value: string) {
+    return id(value)
+}
+
+// Reads a Tiny-friendly MongoDB ObjectID.
+//
+// Example:
+// ```tiny
+// io.println(mongo.idString(user._id))
+// ```
+export fn idString(value: any): string {
+    if value == null {
+        return ""
+    }
+
+    return value.id
+}
+
+// Alias for idString().
+export fn objectIdString(value: any): string {
+    return idString(value)
+}
+
+// Creates a MongoDB Date input value from an ISO string.
+// This is only used when sending data to MongoDB.
+//
+// Returned documents use the Tiny-friendly shape:
+//
+// ```tiny
+// doc.createdAt.date
+// ```
+//
+// Example:
+// ```tiny
+// mongo.date("2026-06-10T12:00:00Z")
+// ```
+export fn date(value: string) {
+    return {
+        "$date": value
+    }
+}
+
+// Reads a Tiny-friendly MongoDB Date.
+//
+// Example:
+// ```tiny
+// io.println(mongo.dateString(user.createdAt))
+// ```
+export fn dateString(value: any): string {
+    if value == null {
+        return ""
+    }
+
+    return value.date
+}
+
+// Creates a MongoDB Decimal128 input value.
+//
+// Returned documents use:
+//
+// ```tiny
+// price.decimal
+// ```
+export fn decimal(value: string) {
+    return {
+        "$numberDecimal": value
+    }
+}
+
+// Reads a Tiny-friendly MongoDB Decimal128.
+export fn decimalString(value: any): string {
+    if value == null {
+        return ""
+    }
+
+    return value.decimal
+}
+
+// Creates a MongoDB regular expression input value.
+//
+// Example:
+// ```tiny
+// mongo.regex("^tiny", "i")
+// ```
+export fn regex(pattern: string, options = "") {
+    return {
+        "$regularExpression": {
+            "pattern": pattern,
+            "options": options
+        }
+    }
+}
+
+// Creates a MongoDB binary input value from base64.
+//
+// Example:
+// ```tiny
+// mongo.binary("SGVsbG8=", "00")
+// ```
+export fn binary(base64: string, subType = "00") {
+    return {
+        "$binary": {
+            "base64": base64,
+            "subType": subType
+        }
+    }
+}
+
+// Creates a $set update document.
+//
+// Example:
+// ```tiny
+// users.updateOne({ name: "confis" }, mongo.set({ age: 19 }))
+// ```
+export fn set(values: object) {
+    return {
+        "$set": values
+    }
+}
+
+// Creates an $unset update document.
+export fn unset(values: object) {
+    return {
+        "$unset": values
+    }
+}
+
+// Creates an $inc update document.
+export fn inc(values: object) {
+    return {
+        "$inc": values
+    }
+}
+
+// Creates a $push update document.
+export fn push(values: object) {
+    return {
+        "$push": values
+    }
+}
+
+// Connects to MongoDB and returns a MongoClient.
+//
+// Example:
+// ```tiny
+// const client = mongo.connect("mongodb://localhost:27017")
+// ```
+export fn connect(
+uri = "",
+timeoutMs = 10000,
+appName = "tiny-mongo",
+maxPoolSize = 0,
+minPoolSize = 0,
+serverSelectionTimeoutMs = 0,
+connectTimeoutMs = 0): Client.MongoClient {
+    if uri == "" {
+        TinyDotEnv.loadEnv()
+        if ! process.getEnv("MONGODB_URL") {
+            throw error.new("ValidationError", "MongoDB URI is required")
+        }
+
+        uri = process.getEnv("MONGODB_URL").replaceAll("\"", "")
+    }
+
+    const result: Results.ConnectResult = mongoPlugin.connect({
+        uri: uri,
+        timeoutMs: timeoutMs,
+        appName: appName,
+        maxPoolSize: maxPoolSize,
+        minPoolSize: minPoolSize,
+        serverSelectionTimeoutMs: serverSelectionTimeoutMs,
+        connectTimeoutMs: connectTimeoutMs
+    })
+
+    return Client.MongoClient(result.client, mongoPlugin)
+}
+
+// Returns native plugin information.
+export fn version(): MongoVersion {
+    return mongoPlugin.version({})
+}
+
+// Closes every MongoDB client held by the native plugin.
+export fn closeAll(timeoutMs = 10000): Results.SuccessResult {
+    return mongoPlugin.closeAll({
+        timeoutMs: timeoutMs
+    })
+}

@@ -1,0 +1,81 @@
+import std "io"
+
+// import lib "confh/TinyMongoDB" as mongo
+import "../src/mongodb.tiny" as mongo
+
+interface Date {
+    date: string
+}
+
+interface UserData {
+    age: number,
+    createdAt: Date,
+    email: string,
+    name: string
+}
+
+io.println("Tiny MongoDB showcase")
+
+const client = mongo.connect("MONGODB_URL")
+client.ping()
+
+const users = client.database("tiny_demo").collection("users")
+
+users.createIndex({ email: 1 }, "email_unique", true)
+
+users.insertOne({
+    name: "confis",
+    email: "confis@example.com",
+    age: 18,
+    createdAt: mongo.date("2026-06-10T12:00:00Z")
+})
+
+users.insertMany([
+    {
+        name: "Tiny",
+        email: "tiny@example.com",
+        age: 1
+    },
+    {
+        name: "Mongo",
+        email: "mongo@example.com",
+        age: 15
+    }
+])
+
+const found: UserData = users.findOne({
+    email: "confis@example.com"
+})
+
+io.println("Found:")
+io.println(found)
+
+users.updateOne(
+    { email: "confis@example.com" },
+    mongo.set({
+        age: 19
+    })
+)
+
+const adults = users.findMany(
+    { age: { "$gte": 18 } },
+    100,
+    0,
+    { age: -1 },
+    { name: 1, email: 1, age: 1 }
+)
+
+io.println("Adults:")
+io.println(adults)
+
+const count = users.countDocuments({})
+io.println("User count:")
+io.println(count)
+
+users.deleteOne({
+    email: "tiny@example.com"
+})
+
+client.disconnect()
+
+io.println("Done")

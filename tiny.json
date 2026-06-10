@@ -1,0 +1,47 @@
+{
+  "name": "TinyMongoDB",
+  "version": "0.1.0",
+  "entry": "src/mongodb.tiny",
+  "outDir": "dist",
+  "target": "windows-amd64",
+  "scripts": {
+    "build": "tiny build",
+    "dist": "tiny dist",
+    "pack": "tiny pack",
+    "start": "tiny run",
+    "test": "tiny ./examples/main.tiny"
+  },
+  "dependencies": {
+    "TinyDotEnv": {
+      "source": "github:confh/TinyDotEnv",
+      "version": "main",
+      "path": ""
+    }
+  },
+  "ignore": [
+    "*.go",
+    "*.mod",
+    "*.sum",
+    "*.dylib",
+    "*.dll",
+    "*.so"
+  ],
+  "plugins": [
+    {
+      "name": "tiny_mongodb.dll",
+      "path": "plugins/tiny_mongodb.dll"
+    },
+    {
+      "name": "tiny_mongodb.so",
+      "path": "plugins/tiny_mongodb.so"
+    },
+    {
+      "name": "tiny_mongodb.dylib",
+      "path": "plugins/tiny_mongodb.dylib"
+    }
+  ],
+  "compilerOptions": {
+    "stackTraces": true,
+    "strict": false
+  }
+}

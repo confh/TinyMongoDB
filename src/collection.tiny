@@ -1,0 +1,170 @@
+import "results.tiny" as Results;
+
+// Represents one MongoDB collection.
+export class Collection {
+    field client = 0
+    field database = ""
+    field name = ""
+    field plugin: any = null
+
+    // Creates a collection wrapper.
+    fn init(client: number, database: string, name: string, plugin) {
+        this.client = client
+        this.database = database
+        this.name = name
+        this.plugin = plugin
+    }
+
+    // Inserts one document.
+    fn insertOne(document: object, timeoutMs = 10000): Results.InsertOneResult {
+        return this.plugin.insertOne({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            document: document,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Inserts many documents.
+    fn insertMany(documents: array, timeoutMs = 10000): Results.InsertManyResult {
+        return this.plugin.insertMany({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            documents: documents,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Finds one document.
+    //
+    // Returned MongoDB special types are Tiny-friendly:
+    //
+    // ```tiny
+    // doc._id.id
+    // doc.createdAt.date
+    // ```
+    //
+    // Returns null if no document was found.
+    fn findOne(filter = {}, sort = null, projection = null, timeoutMs = 10000) {
+        const result: Results.FindOneResult = this.plugin.findOne({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            sort: sort,
+            projection: projection,
+            timeoutMs: timeoutMs
+        })
+
+        return result.doc
+    }
+
+    // Finds many documents.
+    //
+    // Returned MongoDB special types are Tiny-friendly:
+    //
+    // ```tiny
+    // doc._id.id
+    // doc.createdAt.date
+    // ```
+    //
+    // Safety:
+    // - default limit: 100
+    // - plugin max limit: 1000
+    fn findMany(filter = {}, limit = 100, skip = 0, sort?: object, projection?: object, timeoutMs = 10000): array {
+        const result: Results.FindManyResult = this.plugin.findMany({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            limit: limit,
+            skip: skip,
+            sort: sort,
+            projection: projection,
+            timeoutMs: timeoutMs
+        })
+
+        return result.docs
+    }
+
+    // Updates one document.
+    fn updateOne(filter: object, update: object, upsert = false, timeoutMs = 10000): Results.UpdateResult {
+        return this.plugin.updateOne({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            update: update,
+            upsert: upsert,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Updates many documents.
+    fn updateMany(filter: object, update: object, upsert = false, timeoutMs = 10000): Results.UpdateResult {
+        return this.plugin.updateMany({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            update: update,
+            upsert: upsert,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Deletes one document.
+    fn deleteOne(filter: object, timeoutMs = 10000): Results.DeleteResult {
+        return this.plugin.deleteOne({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Deletes many documents.
+    fn deleteMany(filter: object, timeoutMs = 10000): Results.DeleteResult {
+        return this.plugin.deleteMany({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            timeoutMs: timeoutMs
+        })
+    }
+
+    // Counts matching documents.
+    fn countDocuments(filter = {}, timeoutMs = 10000): number {
+        const result: Results.CountResult = this.plugin.countDocuments({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            filter: filter,
+            timeoutMs: timeoutMs
+        })
+
+        return result.count
+    }
+
+    // Creates an index.
+    //
+    // Example:
+    // ```tiny
+    // users.createIndex({ email: 1 }, "email_unique", true)
+    // ```
+    fn createIndex(keys: object, name = "", unique = false, timeoutMs = 10000): Results.CreateIndexResult {
+        return this.plugin.createIndex({
+            client: this.client,
+            database: this.database,
+            collection: this.name,
+            keys: keys,
+            name: name,
+            unique: unique,
+            timeoutMs: timeoutMs
+        })
+    }
+}
